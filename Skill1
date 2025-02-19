@@ -1,0 +1,123 @@
+import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
+
+
+
+from google.colab import drive
+drive.mount('/content/drive')
+
+df1=pd.read_csv("/content/drive/MyDrive/dataset/winequality-red.csv",sep=";")
+df2=pd.read_csv("/content/drive/MyDrive/dataset/winequality-white.csv",sep=";")
+
+final=pd.concat([df1, df2])
+final.head()
+
+final=final.rename(columns={'fixed acidity':'acidity'})
+final.head()
+
+final.to_csv('/content/drive/MyDrive/final_wine_data.csv', index=False)
+
+final.head(10)
+
+sns.boxplot(final['residual sugar'])
+
+final.info()
+
+
+final.describe()
+
+final.isnull().any()
+
+final.isnull().sum()
+
+final.drop_duplicates(inplace = True)
+
+final.duplicated()
+
+final.drop_duplicates(inplace=True)
+
+final.dropna(inplace=True)
+
+
+
+import numpy as np
+from scipy import stats
+z_scores = np.abs(stats.zscore(final.select_dtypes(include=[np.number])))  # Only for numeric columns
+
+# Set a threshold for Z-score
+threshold = 3
+
+# Identify outliers: Any value where Z-score > threshold
+outliers_zscore = (z_scores > threshold)
+
+# Get the indices of outliers
+outlier_indices_zscore = np.where(outliers_zscore)[0]
+
+# Display the rows with outliers
+outliers_df = final.iloc[outlier_indices_zscore]
+print("Outliers based on Z-score:")
+print(outliers_df.head())
+
+import numpy as np
+import pandas as pd
+from scipy import stats
+
+# Compute Z-scores for numeric columns
+z_scores = np.abs(stats.zscore(final.select_dtypes(include=[np.number])))
+
+# Remove rows where any column has Z-score > 3
+threshold = 3
+final_cleaned = final[(z_scores < threshold).all(axis=1)]
+
+# Print results
+print("Original dataset size:", final.shape)
+print("Cleaned dataset size:", final_cleaned.shape)
+print("Cleaned Data:\n", final_cleaned)
+
+
+Q1 = final['residual sugar'].quantile(0.25)
+Q3 = final['residual sugar'].quantile(0.75)
+IQR = Q3 - Q1
+
+# Compute lower and upper bounds
+lower_bound = Q1 - 1.5 * IQR
+upper_bound = Q3 + 1.5 * IQR
+
+# Print values
+print(f"Q1 (25th percentile): {Q1}")
+print(f"Q3 (75th percentile): {Q3}")
+print(f"IQR: {IQR}")
+print(f"Lower Bound: {lower_bound}")
+print(f"Upper Bound: {upper_bound}")
+
+# Detect outliers
+outliers = final[(final['residual sugar'] < lower_bound) | (final['residual sugar'] > upper_bound)]
+print(f"Number of outliers: {outliers.shape[0]}")
+
+final_cleaned = final[(final['residual sugar'] >= lower_bound) & (final['residual sugar'] <= upper_bound)]
+
+# Print results
+print(f"Original dataset size: {final.shape}")
+print(f"Cleaned dataset size: {final_cleaned.shape}")
+
+# Boxplot visualization
+sns.boxplot(x=final_cleaned['residual sugar'])
+plt.show()
+
+final.info()
+
+
+final.describe()
+
+final.isnull().any()
+
+final.isnull().sum()
+
+final.drop_duplicates(inplace = True)
+
+final.duplicated()
+
+final.drop_duplicates(inplace=True)
+
+final.dropna(inplace=True)
